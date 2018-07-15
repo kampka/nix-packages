@@ -1,4 +1,5 @@
 # My personal nix-repository
+[![Build Status](https://travis-ci.org/kampka/nix-packages.svg?branch=master)](https://travis-ci.org/kampka/nix-packages)
 
 This repository contains nix expressions, including derivations of packages that I maintain, mostly for myself.
 
