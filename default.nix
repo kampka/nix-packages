@@ -1,6 +1,6 @@
 
-{ callPackage, callPackages }:
+{ pkgs }:
 
-rec {
-  nixify = callPackage ./nixify {};
+{
+  nixify = pkgs.callPackage ./nixify {};
 }
