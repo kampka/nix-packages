@@ -2,5 +2,5 @@
 { pkgs }:
 
 {
-  nixify = pkgs.callPackage ./nixify {};
+  nixify = pkgs.callPackage ./pkgs/nixify {};
 }
