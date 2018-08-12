@@ -14,12 +14,21 @@ let
 
   # Keep tmux alive even if there is no active session left
   set -g exit-empty off
+  set -g exit-unattached off
+  set -g destroy-unattached off
+
+  ${optionalString (cfg.zshAutoConfigure) ''
+  # Configure zsh as default shell
+  set-option -g default-shell ${pkgs.zsh}/bin/zsh
+  set-option -g default-command ${pkgs.zsh}/bin/zsh
+  ''}
+
 
   # Source users tmux.conf
   if-shell "test -e $HOME/.tmux.conf" 'source "$HOME/.tmux.conf"'
   '';
 
-
+  tmuxStarter = "${lib.readFile ./tmux-starter}";
 in {
 
   options.services.tmux = {
@@ -42,14 +51,26 @@ in {
       default = "default";
       description = "The name of the tmux session to spawn.";
     };
+
+    zshAutoConfigure = mkOption {
+      type = types.bool;
+      default = config.programs.zsh.enable;
+    };
   };
 
   config = mkIf cfg.enable {
 
     environment.systemPackages = [ pkgs.tmux ];
 
+    programs.zsh.interactiveShellInit = mkIf cfg.zshAutoConfigure ''
+      ${tmuxStarter}
+    '';
     systemd.user.services.tmux = {
       description = "tmux terminal multiplexer";
+
+      unitConfig = {
+        ConditionUser = "!@system";
+      };
 
       serviceConfig = {
         Type      = "forking";
