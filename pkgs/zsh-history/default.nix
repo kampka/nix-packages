@@ -7,30 +7,34 @@ buildGoPackage rec {
 
   src = fetchFromGitHub {
     owner = "b4b4r07";
-    repo = "zsh-history";
-    rev = "507ccadcc140a62fce2dd8d179b669cbaae24b50";
-    sha256 = "0d5w1rgb5ksfldrs54qf2pmy1rpqrayngfaa6xvfrrdhypr9grwz";
+    repo = "history";
+    rev = "d0ddf53ca710cdc72eb1d10178937be74fc4a00e";
+    sha256 = "0hymxkvb1v75af7k0i55cj0jfq41rlhs2nq438dd7fsyqf28dwgn";
   };
 
   goDeps = ./deps.nix;
-  goPackagePath = "zsh-history";
+  goPackagePath = "history";
 
   preConfigure = ''
     # Extract the source
     mkdir -p "$NIX_BUILD_TOP/go/src/github.com/b4b4r07"
-    cp -a $NIX_BUILD_TOP/source "$NIX_BUILD_TOP/go/src/github.com/b4b4r07/zsh-history"
-    export GOPATH=$NIX_BUILD_TOP/go/src/github.com/b4b4r07/zsh-history:$GOPATH
+    cp -a $NIX_BUILD_TOP/source "$NIX_BUILD_TOP/go/src/github.com/b4b4r07/history"
+    export GOPATH=$NIX_BUILD_TOP/go/src/github.com/b4b4r07/history:$GOPATH
   '';
 
   installPhase = ''
-    mkdir -p "$bin/bin"
-    install -m 0755 $NIX_BUILD_TOP/go/bin/zhist "$bin/bin"
+    install -d "$bin/bin"
+    install -m 0755 $NIX_BUILD_TOP/go/bin/history "$bin/bin"
+    install -d $out/share
+    cp -r $NIX_BUILD_TOP/go/src/history/misc/* $out/share
+    cp -r $out/share/zsh/completions $out/share/zsh/site-functions
   '';
 
   meta = {
-    description = "A plugin for zsh history extended by golang, dealing it like SQL - Binary components";
+    description = "A CLI to provide enhanced history for your shell";
     license = licenses.mit;
-    homepage = https://github.com/b4b4r07/zsh-history;
+    homepage = https://github.com/b4b4r07/history;
     platforms = platforms.unix;
+    outputsToInstall = [ "out" "bin" ];
   };
 }
