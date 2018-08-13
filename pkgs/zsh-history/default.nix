@@ -15,6 +15,11 @@ buildGoPackage rec {
   goDeps = ./deps.nix;
   goPackagePath = "history";
 
+  patches = [
+    ./0001-Substiture-HOME-in-paths.patch
+    ./0002-Create-paths-if-the-don-t-exist.patch
+  ];
+
   preConfigure = ''
     # Extract the source
     mkdir -p "$NIX_BUILD_TOP/go/src/github.com/b4b4r07"
