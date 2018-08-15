@@ -8,17 +8,12 @@ buildGoPackage rec {
   src = fetchFromGitHub {
     owner = "b4b4r07";
     repo = "history";
-    rev = "d0ddf53ca710cdc72eb1d10178937be74fc4a00e";
-    sha256 = "0hymxkvb1v75af7k0i55cj0jfq41rlhs2nq438dd7fsyqf28dwgn";
+    rev = "ff09a04a385bd11ab112c9233be9b83fe9f84b33";
+    sha256 = "1h1sdpm8fg9nh3k0s26xrkzvjlsjpcwx35db60q32z6g6wvr19sx";
   };
 
   goDeps = ./deps.nix;
   goPackagePath = "history";
-
-  patches = [
-    ./0001-Substiture-HOME-in-paths.patch
-    ./0002-Create-paths-if-the-don-t-exist.patch
-  ];
 
   preConfigure = ''
     # Extract the source
