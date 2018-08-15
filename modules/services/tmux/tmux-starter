@@ -1,6 +1,10 @@
 # Don't run tmux if it is already running
 if [[ "$-" = *i* ]] && [ -z $TMUX ] && [ -z "$SSH_CLIENT" ]; then
 
+    if [[ "$TERM" = "xterm-termite" ]]; then
+        export TERM="screen-256color"
+    fi
+
     if ! (( $+commands[tmux] )); then
         echo "tmux not found" 1>&2
     else
