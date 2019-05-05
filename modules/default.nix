@@ -1,5 +1,6 @@
 {
   direnv = ./programs/direnv;
+  firefox = ./programs/firefox;
   zsh-history = ./programs/zsh-history;
 
   dns-cache = ./services/dns-cache;
