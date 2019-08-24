@@ -8,6 +8,7 @@ let
   cfg = config.kampka.services.msmtp-mailqueue;
 
   sendmail = pkgs.writeScriptBin "sendmail" ''
+    #!${pkgs.runtimeShell}
     set -e
     export MAILQUEUE_DIR="${cfg.mailDir}"
     exec ${mailqueue}/bin/msmtpq "''${extraFlagsArray[@]}" "$@"
@@ -135,7 +136,16 @@ in {
         description = "msmtpq queue user";
         uid = config.ids.uids.smtpq;
         group = "smtpq";
+        extraGroups = [ "keys" ];
       };
+    };
+
+    services.mail.sendmailSetuidWrapper = mkIf config.services.postfix.setSendmail {
+      program = "sendmail";
+      source = "${sendmail}/bin/sendmail";
+      group = "smtpq";
+      setuid = false;
+      setgid = true;
     };
 
     environment.etc."msmtprc".source = msmtprc;
@@ -150,9 +160,13 @@ in {
         set -e
         mkdir -p "${cfg.mailDir}"
         chown smtpq:smtpq "${cfg.mailDir}"
-        chmod 777 "${cfg.mailDir}"
+        chmod 0773 "${cfg.mailDir}"
         chmod g+s "${cfg.mailDir}"
         setfacl -R -m g:smtpq:rwx "${cfg.mailDir}"
+
+        mkdir -p /var/lib/msmtpq
+        chown smtpq:smtpq /var/lib/msmtpq
+        chmod 700 /var/lib/msmtpq
       '';
 
       after = [ "local-fs.target" ];
@@ -180,6 +194,7 @@ in {
         MAILQUEUE_DIR = cfg.mailDir;
         MSMTP_CONFIG = msmtprc;
         GPG_ENCRYPT_KEYS = "${concatStringsSep " " cfg.gpgKeys}";
+        GNUPGHOME = "/var/lib/msmtpq/.gnupg";
       };
 
       path = [ mailqueue pkgs.coreutils pkgs.utillinux ];
@@ -189,6 +204,9 @@ in {
       serviceConfig = {
         ExecStart = "${mailqueue}/bin/msmtpq-flush";
         Type = "oneshot";
+        User = "smtpq";
+        PrivateTmp = true;
+        WorkingDirectory = cfg.mailDir;
       };
     };
   };
