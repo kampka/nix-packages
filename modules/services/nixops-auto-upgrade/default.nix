@@ -44,7 +44,6 @@ in {
     nixPathPaths = (flatten (map (tail) (map (strings.splitString "=") nixPathEntries)));
 
   in mkIf cfg.enable rec {
-
     assertions = [
       { assertion = (foldl (a: b: a && b) true (map (strings.hasPrefix "http") nixPathPaths));
         message = "NIX_PATH can only contain paths that start with http (got: ${cfg.nixPath})"; }
@@ -72,6 +71,10 @@ in {
         rm -f /etc/nixos/current/*
         ln -sf ${cfg.configurationPath}/* /etc/nixos/current
       '';
+    };
+
+    kampka.services.systemd-failure-email = {
+      services = [ "nixos-upgrade" ];
     };
   };
 }
