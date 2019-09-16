@@ -1,5 +1,6 @@
 language: nix
 script:
+    - nix-shell --run "find . -name '*.nix' | xargs nixpkgs-fmt --check"
     - nix-build -E 'with import <nixpkgs>{}; (callPackage ./nur.nix {})'
     - nix-build -E 'with import <nixpkgs>{}; (callPackage ./default.nix {})'
 
