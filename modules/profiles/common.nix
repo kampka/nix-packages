@@ -42,6 +42,7 @@ in
     cat = "bat -p --pager=never";
   };
 
+  boot.cleanTmpDir = mkDefault (! config.boot.tmpOnTmpfs);
 
   i18n = {
     defaultLocale = mkDefault "en_US.UTF-8";
