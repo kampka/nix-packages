@@ -23,8 +23,12 @@ in
     coreutils
     utillinux
 
+    atop
+    iotop
+
     curl
     inetutils
+    wget
 
     gzip
     bzip2
