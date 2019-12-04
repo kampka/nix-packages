@@ -7,16 +7,6 @@ let
   cfg = config.kampka.profiles.desktop;
   common = import ./common.nix { inherit config pkgs lib; };
 
-  oldStable = (
-    import (
-      builtins.fetchTarball {
-        url = "https://github.com/NixOS/nixpkgs-channels/archive/nixos-19.03.tar.gz";
-        sha256 = "05625fwgsa15i2jlsf2ymv3jx68362nf3zqbpnrwq6d3sn89liny";
-      }
-    ) { inherit config; }
-  );
-
-  alacritty-oldStable = oldStable.alacritty;
 in
 {
 
