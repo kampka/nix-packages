@@ -7,15 +7,6 @@ let
   cfg = config.kampka.profiles.desktop;
   common = import ./common.nix { inherit config pkgs lib; };
 
-  trilium = let
-    version = "0.37.8";
-  in pkgs.trilium.overrideAttrs (attrs: {
-    inherit version;
-    src = pkgs.fetchurl {
-      url = "https://github.com/zadam/trilium/releases/download/v${version}/trilium-linux-x64-${version}.tar.xz";
-      sha256 = "06d88waxxjdnrn0y8qr6p9rf5xkvl5lbabb0xyk0dgy3wg70zlxz";
-    };
-  });
 in
 {
 
@@ -78,7 +69,6 @@ in
       hardware.enableRedistributableFirmware = mkDefault true;
 
       environment.systemPackages = common.environment.systemPackages ++ [ 
-        trilium
       ] ++(
         with pkgs; [
           ctags
