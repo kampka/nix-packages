@@ -12,13 +12,10 @@ in
   environment.systemPackages = with pkgs; [
     bash
 
-    bat
     less
-    most
     ncdu
 
-    neovim
-    ripgrep
+    gnugrep
 
     coreutils
     utillinux
@@ -35,17 +32,6 @@ in
     bzip2
     xz
   ];
-
-  environment.variables = {
-    EDITOR = "nvim";
-    PAGER = "most";
-  };
-
-  environment.shellAliases = {
-    vi = "nvim";
-    vim = "nvim";
-    cat = "bat -p --pager=never";
-  };
 
   boot.cleanTmpDir = mkDefault (! config.boot.tmpOnTmpfs);
 

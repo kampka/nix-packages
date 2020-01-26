@@ -89,16 +89,32 @@ in
 
       environment.systemPackages = common.environment.systemPackages ++ [] ++ (
         with pkgs; [
+          alacritty
+          bat
           ctags
+          fzf
           git
           gnupg
+          most
+          neovim
+          ntfs3g
+          ripgrep
           rsync
           stow
-          fzf
-          ntfs3g
-          alacritty
         ]
       );
+
+      environment.variables = {
+        EDITOR = "nvim";
+        PAGER = "most";
+      };
+
+      environment.shellAliases = {
+        vi = "nvim";
+        vim = "nvim";
+        cat = "bat -p --pager=never";
+      };
+
     }
   );
 }
