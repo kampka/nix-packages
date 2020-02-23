@@ -5,6 +5,7 @@ script:
     #- nix-shell --run "find . -name '*.nix' -exec nixpkgs-fmt --check {} +;"
     - nix-build -E 'with import <nixpkgs>{}; (callPackage ./nur.nix {})'
     - nix-build -E 'with import <nixpkgs>{}; (callPackage ./default.nix {})'
+    - nix-build tests/profiles-desktop.nix
 
 deploy:
     - provider: script
