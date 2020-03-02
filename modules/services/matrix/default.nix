@@ -186,7 +186,7 @@ in
             disable_custom_urls = true;
           };
       in
-        pkgs.riot-web.override { conf = builtins.toJSON config; };
+        pkgs.riot-web.override { conf = config; };
     };
 
     services.coturn = {
