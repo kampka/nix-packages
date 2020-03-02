@@ -184,6 +184,7 @@ in
               server_name = cfg.matrix.serverName;
             };
             disable_custom_urls = true;
+            disable_guests = true;
           };
       in
         pkgs.riot-web.override { conf = config; };
