@@ -40,18 +40,19 @@ in
   config = mkIf cfg.enable {
 
     services.nginx.enable = true;
-    services.nginx.recommendedProxySettings = true;
-    services.nginx.recommendedOptimisation = true;
-    services.nginx.recommendedTlsSettings = true;
-    services.nginx.recommendedGzipSettings = true;
+    services.nginx.recommendedProxySettings = mkDefault true;
+    services.nginx.recommendedOptimisation = mkDefault true;
+    services.nginx.recommendedTlsSettings = mkDefault true;
+    services.nginx.recommendedGzipSettings = mkDefault true;
 
     services.nginx.appendConfig = ''
       error_log stderr debug;
     '';
 
-    services.nginx.sslDhparam = mkIf cfg.generateDhParams
-      "${config.services.nginx.stateDir}/dhparams-${toString cfg.dhParamBytes}.pem"
-    ;
+    services.nginx.sslDhparam = mkIf cfg.generateDhParams (
+      mkDefault
+        "${config.services.nginx.stateDir}/dhparams-${toString cfg.dhParamBytes}.pem"
+    );
 
     systemd.services.nginx.serviceConfig.TimeoutStartSec = "10 min";
     systemd.services.nginx.preStart = mkIf cfg.generateDhParams ''
