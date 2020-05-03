@@ -71,13 +71,13 @@ in
     );
 
     systemd.services.nginx.serviceConfig.TimeoutStartSec = "10 min";
-    systemd.services.nginx.preStart = mkIf cfg.generateDhParams ''
+    systemd.services.nginx.preStart = mkIf cfg.generateDhParams (mkBefore ''
       #!${pkgs.stdenv.shell}
 
       if [ ! -f "${config.services.nginx.stateDir}/dhparams-${toString cfg.dhParamBytes}.pem" ]; then
         ${pkgs.openssl}/bin/openssl dhparam -out "${config.services.nginx.stateDir}/dhparams-${toString cfg.dhParamBytes}.pem" ${toString cfg.dhParamBytes}
       fi
-    '';
+    '');
     networking.firewall.allowedTCPPorts = [ 80 443 ];
   };
 }
