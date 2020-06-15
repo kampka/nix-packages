@@ -74,10 +74,14 @@ in
       '';
 
       system.activationScripts = {
-        configuration = ''
+        configuration =
+        let
+          configurationPath = builtins.path { name = "nixos-configuration"; path = cfg.configurationPath; };
+        in
+        ''
           mkdir -p /etc/nixos/current/
           rm -f /etc/nixos/current/*
-          ln -sf ${cfg.configurationPath}/* /etc/nixos/current
+          ln -sf ${configurationPath}/* /etc/nixos/current
         '';
       };
 
