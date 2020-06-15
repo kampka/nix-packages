@@ -65,19 +65,13 @@ in
       }
     );
 
-    services.nginx.sslDhparam = mkIf cfg.generateDhParams (
-      mkDefault
-        "${config.services.nginx.stateDir}/dhparams-${toString cfg.dhParamBytes}.pem"
-    );
+    services.nginx.sslDhparam = mkIf cfg.generateDhParams config.security.dhparams.params.nginx.path;
 
-    systemd.services.nginx.serviceConfig.TimeoutStartSec = "10 min";
-    systemd.services.nginx.preStart = mkIf cfg.generateDhParams ''
-      #!${pkgs.stdenv.shell}
+    security.dhparams = mkIf cfg.generateDhParams {
+      enable = true;
+      params.nginx.bits = cfg.dhParamBytes;
+    };
 
-      if [ ! -f "${config.services.nginx.stateDir}/dhparams-${toString cfg.dhParamBytes}.pem" ]; then
-        ${pkgs.openssl}/bin/openssl dhparam -out "${config.services.nginx.stateDir}/dhparams-${toString cfg.dhParamBytes}.pem" ${toString cfg.dhParamBytes}
-      fi
-    '';
     networking.firewall.allowedTCPPorts = [ 80 443 ];
   };
 }
