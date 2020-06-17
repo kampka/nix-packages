@@ -1,10 +1,27 @@
+sudo: true
+dist: bionic
 language: nix
 nix: 2.3
+
+env:
+- NIX_CHANNEL=20.03
+- NIX_CHANNEL=unstable
+
+before_script:
+    # setup qemu/kvm
+    - sudo -E apt-get -yq --no-install-suggests --no-install-recommends install bridge-utils libpulse0 libvirt-bin qemu-kvm virtinst ubuntu-vm-builder
+    - sudo addgroup libvirt
+    - sudo adduser $USER libvirt
+    - sudo adduser $USER kvm
+
+    - nix-channel --add https://nixos.org/channels/nixos-$NIX_CHANNEL nixpkgs
+    - nix-channel --update
 
 script:
     #- nix-shell --run "find . -name '*.nix' -exec nixpkgs-fmt --check {} +;"
     - nix-build -E 'with import <nixpkgs>{}; (callPackage ./nur.nix {})'
     - nix-build -E 'with import <nixpkgs>{}; (callPackage ./default.nix {})'
+    - nix-build tests/profiles-desktop.nix
 
 deploy:
     - provider: script
