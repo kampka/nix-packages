@@ -1,4 +1,4 @@
-{ pkgs, stdenv, buildPackages, fetchFromGitHub, makeWrapper }:
+{ pkgs, stdenv, buildPackages, fetchFromGitHub, makeWrapper, bash }:
 
 stdenv.mkDerivation rec {
   version = "0.1";
@@ -17,8 +17,13 @@ stdenv.mkDerivation rec {
     mkdir -p $out/bin
     install -m 755 src/msmtpq $out/bin/msmtpq
     install -m 755 src/msmtpq-flush $out/bin/msmtpq-flush
-    wrapProgram $out/bin/msmtpq --prefix PATH : "${pkgs.stdenv.lib.makeBinPath [ pkgs.coreutils pkgs.utillinux pkgs.nettools ]}"
-    wrapProgram $out/bin/msmtpq-flush --prefix PATH : "${pkgs.stdenv.lib.makeBinPath [ pkgs.msmtp pkgs.gnupg pkgs.coreutils pkgs.utillinux pkgs.nettools ]}"
+    wrapProgram $out/bin/msmtpq --prefix PATH : "${pkgs.stdenv.lib.makeBinPath [ pkgs.coreutils pkgs.utillinux pkgs.nettools pkgs.bash ]}"
+    wrapProgram $out/bin/msmtpq-flush --prefix PATH : "${pkgs.stdenv.lib.makeBinPath [ pkgs.msmtp pkgs.gnupg pkgs.coreutils pkgs.utillinux pkgs.nettools pkgs.bash ]}"
+  '';
+
+  fixupPhase = ''
+    substituteInPlace $out/bin/msmtpq --replace "${buildPackages.bash}" "${bash}"
+    substituteInPlace $out/bin/msmtpq-flush --replace "${buildPackages.bash}" "${bash}"
   '';
 
   meta = with stdenv.lib; {
