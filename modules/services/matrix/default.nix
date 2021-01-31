@@ -175,7 +175,7 @@ in
         let
           config =
             let
-              sample = builtins.fromJSON (builtins.readFile "${pkgs.riot-web}/config.sample.json");
+              sample = builtins.fromJSON (builtins.readFile "${pkgs.element-web}/config.sample.json");
             in
             lib.recursiveUpdate sample {
               piwik = false;
@@ -187,7 +187,7 @@ in
               disable_guests = true;
             };
         in
-        pkgs.riot-web.override { conf = config; };
+        pkgs.element-web.override { conf = config; };
     };
 
     services.coturn = {
