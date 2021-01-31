@@ -165,7 +165,6 @@ in
     # share certs with matrix-synapse and restart on renewal
     security.acme.certs."${cfg.matrix.hostName}" = {
       group = "matrix-synapse";
-      allowKeysForGroup = true;
       postRun = "systemctl reload nginx.service; systemctl restart matrix-synapse.service";
     };
 
@@ -213,7 +212,6 @@ in
 
     security.acme.certs."${cfg.turn.hostName}" = mkIf (cfg.turn.enable) {
       group = "turnserver";
-      allowKeysForGroup = true;
       postRun = "systemctl reload nginx.service; systemctl restart coturn.service";
     };
 
