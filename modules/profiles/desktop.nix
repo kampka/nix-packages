@@ -4,25 +4,6 @@ with lib;
 let
   cfg = config.kampka.profiles.desktop;
   common = import ./common.nix { inherit config pkgs lib; };
-
-  neovim-overlay = self: super:
-    let
-      vimConfigure = {
-        customRC = ''
-          let s:localVimConfig = $HOME . "/.config/nvim/init.vim"
-          if filereadable(expand(s:localVimConfig))
-            exe 'source' s:localVimConfig
-          endif
-        '';
-        packages.kampka-defaults.opt = with pkgs.vimPlugins; [ LanguageClient-neovim ];
-      };
-    in
-    {
-      neovim = super.neovim.override {
-        configure = vimConfigure;
-        extraMakeWrapperArgs = "--set MYVIMRC ${pkgs.vimUtils.vimrcFile vimConfigure}";
-      };
-    };
 in
 {
 
@@ -32,8 +13,6 @@ in
 
   config = mkIf cfg.enable (
     recursiveUpdate common rec{
-
-      nixpkgs.overlays = [ neovim-overlay ];
 
       boot.loader.grub.splashImage = null;
 
@@ -96,13 +75,14 @@ in
           gnupg
           kitty
           most
-          neovim
           ntfs3g
           ripgrep
           rsync
           stow
         ]
       );
+
+      programs.neovim.enable = true;
 
       environment.variables = {
         EDITOR = "nvim";
@@ -114,7 +94,6 @@ in
         vim = "nvim";
         cat = "bat -p --pager=never";
       };
-
     }
   );
 }
