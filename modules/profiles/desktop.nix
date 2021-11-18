@@ -58,7 +58,7 @@ in
       services.xserver.displayManager.gdm.enable = mkDefault true;
       # Disable wayland if the nvidia driver is used
       services.xserver.displayManager.gdm.wayland = mkDefault (!(any (v: v == "nvidia") config.services.xserver.videoDrivers));
-      services.xserver.desktopManager.gnome3.enable = mkDefault true;
+      services.xserver.desktopManager.gnome.enable = mkDefault true;
 
       # Typically needed for wifi drivers and the like
       hardware.enableRedistributableFirmware = mkDefault true;
