@@ -76,6 +76,8 @@ in
           kitty
           most
           ntfs3g
+          neovim
+          nvimpager
           ripgrep
           rsync
           stow
@@ -86,7 +88,7 @@ in
 
       environment.variables = {
         EDITOR = "nvim";
-        PAGER = "most";
+        PAGER = "nvimpager";
       };
 
       environment.shellAliases = {
