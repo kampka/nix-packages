@@ -4,21 +4,6 @@ with lib;
 let
   cfg = config.kampka.services.dns-cache;
 
-  renderServer = (
-    server:
-    ''
-      - address_data: ${server.address}
-          tls_auth_name: "${server.tlsAuthName}"
-          tls_pubkey_pinset:
-            - digest: "${server.tlsPubkeyPinset.digest}"
-              value: ${server.tlsPubkeyPinset.value}
-    ''
-  );
-
-  upstreamServers = ''
-    ${concatStringsSep "\n" (map (server: "  ${(renderServer server)}") cfg.upstreamServers)}
-  '';
-
   dhcpHostOpts = { name, config, ... }: {
     options = {
       hardwareAddress = mkOption {
@@ -115,95 +100,71 @@ in
   options.kampka.services.dns-cache = {
     enable = mkEnableOption "dns cache service with dns-over-tls";
 
-    upstreamServers = mkOption {
-      description = "List of upstream dns servers";
-      default = [
-        # Nameserver run by digitalcourage
-        {
-          address = "46.182.19.48";
-          tlsAuthName = "dns2.digitalcourage.de";
-          tlsPubkeyPinset = {
-            value = "v7rm6OtQQD3x/wbsdHDZjiDg+utMZvnoX3jq3Vi8tGU=";
-            digest = "sha256";
-          };
-        }
-        {
-          address = "2a02:2970:1002::18";
-          tlsAuthName = "dns2.digitalcourage.de";
-          tlsPubkeyPinset = {
-            value = "v7rm6OtQQD3x/wbsdHDZjiDg+utMZvnoX3jq3Vi8tGU=";
-            digest = "sha256";
-          };
-        }
-
-        # Nameserver run by dismail.de
-        {
-          address = "80.241.218.68";
-          tlsAuthName = "fdns1.dismail.de";
-          tlsPubkeyPinset = {
-            value = "MMi3E2HZr5A5GL+badqe3tzEPCB00+OmApZqJakbqUU=";
-            digest = "sha256";
-          };
-        }
-        {
-          address = "2a02:c205:3001:4558::1";
-          tlsAuthName = "fdns1.dismail.de";
-          tlsPubkeyPinset = {
-            value = "MMi3E2HZr5A5GL+badqe3tzEPCB00+OmApZqJakbqUU=";
-            digest = "sha256";
-          };
-        }
-
-        # Nameserver run by dismail.de
-        {
-          address = "159.69.114.157";
-          tlsAuthName = "fdns2.dismail.de";
-          tlsPubkeyPinset = {
-            value = "yJYDim2Wb6tbxUB3yA5ElU/FsRZZhyMXye8sXhKEd1w=";
-            digest = "sha256";
-          };
-        }
-        {
-          address = "2a01:4f8:c17:739a::2";
-          tlsAuthName = "fdns2.dismail.de";
-          tlsPubkeyPinset = {
-            value = "yJYDim2Wb6tbxUB3yA5ElU/FsRZZhyMXye8sXhKEd1w=";
-            digest = "sha256";
-          };
-        }
-      ];
-      type = types.listOf (
-        types.submodule {
-          options = {
-            address = mkOption {
-              type = types.str;
-              example = "1.1.1.1";
-              description = "IP address of the upstream DNS server";
-            };
-            tlsAuthName = mkOption {
-              type = types.str;
-              description = "DNS name for which the certificate has to be valid";
-            };
-            tlsPubkeyPinset = mkOption {
-              type = types.submodule {
-                options = {
-                  digest = mkOption {
-                    type = types.str;
-                    example = "sha256";
-                    default = "sha256";
-                    description = "Hash algorithm of the certificate hash";
-                  };
-                  value = mkOption {
-                    type = types.str;
-                    description = "Base64 encoded hash of servers TLS certificate";
-                  };
+    stubbySetting = mkOption
+      {
+        description = "List of upstream dns servers";
+        default = pkgs.stubby.passthru.settingsExample //
+          {
+            listen_addresses = [
+              "127.0.0.1@5353"
+            ];
+            upstream_recursive_servers = [
+              # Nameserver run by digitalcourage
+              {
+                address_data = "46.182.19.48";
+                tls_auth_name = "dns2.digitalcourage.de";
+                tls_pubkey_pinset = {
+                  value = "v7rm6OtQQD3x/wbsdHDZjiDg+utMZvnoX3jq3Vi8tGU=";
+                  digest = "sha256";
                 };
-              };
-            };
+              }
+              {
+                address_data = "2a02:2970:1002::18";
+                tls_auth_name = "dns2.digitalcourage.de";
+                tls_pubkey_pinset = {
+                  value = "v7rm6OtQQD3x/wbsdHDZjiDg+utMZvnoX3jq3Vi8tGU=";
+                  digest = "sha256";
+                };
+              }
+
+              # Nameserver run by dismail.de
+              {
+                address_data = "80.241.218.68";
+                tls_auth_name = "fdns1.dismail.de";
+                tls_pubkey_pinset = {
+                  value = "MMi3E2HZr5A5GL+badqe3tzEPCB00+OmApZqJakbqUU=";
+                  digest = "sha256";
+                };
+              }
+              {
+                address_data = "2a02:c205:3001:4558::1";
+                tls_auth_name = "fdns1.dismail.de";
+                tls_pubkey_pinset = {
+                  value = "MMi3E2HZr5A5GL+badqe3tzEPCB00+OmApZqJakbqUU=";
+                  digest = "sha256";
+                };
+              }
+
+              # Nameserver run by dismail.de
+              {
+                address_data = "159.69.114.157";
+                tls_auth_name = "fdns2.dismail.de";
+                tls_pubkey_pinset = {
+                  value = "yJYDim2Wb6tbxUB3yA5ElU/FsRZZhyMXye8sXhKEd1w=";
+                  digest = "sha256";
+                };
+              }
+              {
+                address_data = "2a01:4f8:c17:739a::2";
+                tls_auth_name = "fdns2.dismail.de";
+                tls_pubkey_pinset = {
+                  value = "yJYDim2Wb6tbxUB3yA5ElU/FsRZZhyMXye8sXhKEd1w=";
+                  digest = "sha256";
+                };
+              }
+            ];
           };
-        }
-      );
-    };
+      };
 
     dnsmasq = mkOption {
       default = { };
@@ -273,8 +234,7 @@ in
     services.stubby = {
       enable = true;
       debugLogging = false;
-      listenAddresses = [ "127.0.0.1@5353" ];
-      upstreamServers = "${upstreamServers}";
+      settings = (cfg.stubbySetting // { resolution_type = "GETDNS_RESOLUTION_STUB"; });
     };
 
     services.dnsmasq = {
@@ -282,75 +242,72 @@ in
       servers = [ "127.0.0.1#5353" ];
       resolveLocalQueries = false;
       extraConfig = ''
-                  ${optionalString (cfg.dnsmasq.validateDnsSec) "
-        dnssec
-        dnssec-check-unsigned
-        conf-file=${pkgs.dnsmasq}/share/dnsmasq/trust-anchors.conf
-        "}
-                  ${optionalString (cfg.dnsmasq.noNegCache) "
-        # Disable negative caching. Negative caching allows dnsmasq to remember 'no such domain' answers from upstream nameservers and answer identical queries without forwarding them again.
-        no-negcache
-        "}
-                  ${optionalString (cfg.dnsmasq.allServers) "
-        # Query all configured server for a successful dns resolve
-        all-servers
-        "}
+                                  ${optionalString (cfg.dnsmasq.validateDnsSec) "
+                        dnssec
+                        dnssec-check-unsigned
+                        conf-file=${pkgs.dnsmasq}/share/dnsmasq/trust-anchors.conf
+                        "}
+                                  ${optionalString (cfg.dnsmasq.noNegCache) "
+                        # Disable negative caching. Negative caching allows dnsmasq to remember 'no such domain' answers from upstream nameservers and answer identical queries without forwarding them again.
+                        no-negcache
+                        "}
+                                  ${optionalString (cfg.dnsmasq.allServers) "
+                        # Query all configured server for a successful dns resolve
+                        all-servers
+                        "}
 
-                ${optionalString (cfg.dnsmasq.bogusPriv) ''
-                # Prevent queries for local networks from being sent upstream
-                bogus-priv
-              ''}
+                                ${optionalString (cfg.dnsmasq.bogusPriv) ''
+                                # Prevent queries for local networks from being sent upstream
+                                bogus-priv
+                              ''}
 
-                ${concatStringsSep "\n" (map (interface: "interface=${interface}") cfg.dnsmasq.interfaces)}
+                                ${concatStringsSep "\n" (map (interface: "interface=${interface}") cfg.dnsmasq.interfaces)}
 
-                ${optionalString (cfg.dnsmasq.dhcp != [ ]) "
-        no-dhcp-interface=lo
-        dhcp-ttl=180
-        "}
+                                ${optionalString (cfg.dnsmasq.dhcp != [ ]) "
+                        no-dhcp-interface=lo
+                        dhcp-ttl=180
+                        "}
 
-                ${concatStringsSep "\n" (
-                map
+                                ${concatStringsSep "\n" (
+        map
         (
-                  dhcp: ''
+        dhcp: ''
 
-        domain=${dhcp.domain.name}${optionalString (dhcp.domain.network != "") ",${dhcp.domain.network}${optionalString (dhcp.domain.local) ",local" }"}
+                        domain=${dhcp.domain.name}${optionalString (dhcp.domain.network != "") ",${dhcp.domain.network}${optionalString (dhcp.domain.local) ",local" }"}
 
-        ${concatStringsSep "\n" (
-                    map
+                        ${concatStringsSep "\n" (
+        map
         (
-                      range: "dhcp-range=set:${range.interface},${range.startAddr},${range.endAddr},${range.leaseTime}
-        "
-                    )
+        range: "dhcp-range=set:${range.interface},${range.startAddr},${range.endAddr},${range.leaseTime}
+                        "
+        )
         dhcp.range
-                  )}
+        )}
 
-        ${concatStringsSep "\n" (
-                    map
+                        ${concatStringsSep "\n" (
+        map
         (
-                      host: ''
-                        dhcp-host=${host.hardwareAddress},${host.name},${host.ipAddress},${host.leaseTime},set:${host.name}
-                        ${optionalString (host.staticRecord) "host-record=${host.name},${host.name}.${dhcp.domain.name},${host.ipAddress},120" }
-                      ''
-                    )
+        host: ''
+                                        dhcp-host=${host.hardwareAddress},${host.name},${host.ipAddress},${host.leaseTime},set:${host.name}
+                                        ${optionalString (host.staticRecord) "host-record=${host.name},${host.name}.${dhcp.domain.name},${host.ipAddress},120" }
+                                      ''
+        )
         dhcp.host
-                  )}
+        )}
 
-        ''
-                )
+                        ''
+        )
         cfg.dnsmasq.dhcp
-              )}
+        )}
 
-                ${optionalString (cfg.dnsmasq.logQueries) "
-        log-queries
-        "}
+                                ${optionalString (cfg.dnsmasq.logQueries) "
+                        log-queries
+                        "}
 
-        cache-size=${toString cfg.dnsmasq.cache-size}
+                        cache-size=${toString cfg.dnsmasq.cache-size}
 
-                ${cfg.dnsmasq.extraConfig}
+                                ${cfg.dnsmasq.extraConfig}
       '';
     };
-
-    # Likely redundant in this case
-    services.nscd.enable = mkDefault false;
   };
 }
