@@ -111,6 +111,23 @@ in
             upstream_recursive_servers = [
               # Nameserver run by digitalcourage
               {
+                address_data = "5.9.164.112";
+                tls_auth_name = "dns3.digitalcourage.de";
+                tls_pubkey_pinset = {
+                  value = "2WFzfO2/56HpeR+v/l25NPf5dacfxLrudH5yZbWCfdo=";
+                  digest = "sha256";
+                };
+              }
+              {
+                address_data = "2a01:4f8:251:554::2";
+                tls_auth_name = "dns3.digitalcourage.de";
+                tls_pubkey_pinset = {
+                  value = "2WFzfO2/56HpeR+v/l25NPf5dacfxLrudH5yZbWCfdo=";
+                  digest = "sha256";
+                };
+              }
+
+              {
                 address_data = "46.182.19.48";
                 tls_auth_name = "dns2.digitalcourage.de";
                 tls_pubkey_pinset = {
