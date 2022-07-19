@@ -27,6 +27,7 @@ let
 
       # Source users tmux.conf
       if-shell "test -e $HOME/.tmux.conf" 'source "$HOME/.tmux.conf"'
+      if-shell "test -e $HOME/.config/tmux/tmux.conf" 'source "$HOME/.config/tmux/tmux.conf"'
   '';
 
   tmuxStarter = "${lib.readFile ./tmux-starter}";
