@@ -20,8 +20,8 @@ let
 
       ${optionalString (cfg.zshAutoConfigure) ''
       # Configure zsh as default shell
-      set-option -g default-shell ${pkgs.zsh}/bin/zsh
-      set-option -g default-command ${pkgs.zsh}/bin/zsh
+      #set-option -g default-shell ${pkgs.zsh}/bin/zsh
+      #set-option -g default-command ${pkgs.zsh}/bin/zsh
     ''}
 
 
