@@ -1,10 +1,17 @@
-{ config, lib, pkgs, ... }:
-
-with lib;
-let
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
+with lib; let
   cfg = config.kampka.services.dns-cache;
 
-  dhcpHostOpts = { name, config, ... }: {
+  dhcpHostOpts = {
+    name,
+    config,
+    ...
+  }: {
     options = {
       hardwareAddress = mkOption {
         type = types.str;
@@ -35,7 +42,11 @@ let
     };
   };
 
-  dhcpRangeOpts = { name, config, ... }: {
+  dhcpRangeOpts = {
+    name,
+    config,
+    ...
+  }: {
     options = {
       interface = mkOption {
         type = types.str;
@@ -60,7 +71,7 @@ let
     };
   };
 
-  domainOpt = { config, ... }: {
+  domainOpt = {config, ...}: {
     options = {
       name = mkOption {
         type = types.str;
@@ -77,33 +88,38 @@ let
     };
   };
 
-  dhcpOpts = { name, config, ... }: {
+  dhcpOpts = {
+    name,
+    config,
+    ...
+  }: {
     options = {
       domain = mkOption {
         type = types.submodule domainOpt;
       };
       range = mkOption {
         type = types.listOf (types.submodule dhcpRangeOpts);
-        default = [ ];
+        default = [];
         description = "Specify per host parameters for the DHCP server. This allows a machine with a particular hardware address to be always allocated the same hostname, IP address and lease time.";
       };
       host = mkOption {
         type = types.listOf (types.submodule dhcpHostOpts);
-        default = [ ];
+        default = [];
         description = "Enable the DHCP server. Addresses will be given out from the range <start-addr> to <end-addr> and from statically defined addresses given in dhcpHosts options.";
       };
     };
   };
 
-  stubby_settings = pkgs.stubby.passthru.settingsExample // { upstream_recursive_servers = cfg.stubby.upstreamServers; } // {
-    resolution_type = "GETDNS_RESOLUTION_STUB";
-    listen_addresses = [
-      "127.0.0.1@5353"
-    ];
-  };
-
-in
-{
+  stubby_settings =
+    pkgs.stubby.passthru.settingsExample
+    // {upstream_recursive_servers = cfg.stubby.upstreamServers;}
+    // {
+      resolution_type = "GETDNS_RESOLUTION_STUB";
+      listen_addresses = [
+        "127.0.0.1@5353"
+      ];
+    };
+in {
   options.kampka.services.dns-cache = {
     enable = mkEnableOption "dns cache service with dns-over-tls";
 
@@ -217,7 +233,7 @@ in
     };
 
     dnsmasq = mkOption {
-      default = { };
+      default = {};
       type = types.submodule {
         options = {
           noNegCache = mkOption {
@@ -240,7 +256,7 @@ in
 
           interfaces = mkOption {
             type = types.listOf types.str;
-            default = [ "lo" ];
+            default = ["lo"];
             description = "List of network interfaces to bind to.";
           };
 
@@ -252,7 +268,7 @@ in
 
           dhcp = mkOption {
             type = types.listOf (types.submodule dhcpOpts);
-            default = [ ];
+            default = [];
             description = "DNSMasq dhcp options";
           };
 
@@ -278,8 +294,7 @@ in
   };
 
   config = mkIf cfg.enable {
-
-    networking.nameservers = [ "127.0.0.1" ];
+    networking.nameservers = ["127.0.0.1"];
 
     services.stubby = {
       enable = true;
@@ -289,74 +304,76 @@ in
 
     services.dnsmasq = {
       enable = true;
-      servers = [ "127.0.0.1#5353" ];
+      servers = ["127.0.0.1#5353"];
       resolveLocalQueries = false;
       extraConfig = ''
-                                  ${optionalString (cfg.dnsmasq.validateDnsSec) "
-                        dnssec
-                        dnssec-check-unsigned
-                        conf-file=${pkgs.dnsmasq}/share/dnsmasq/trust-anchors.conf
-                        "}
-                                  ${optionalString (cfg.dnsmasq.noNegCache) "
-                        # Disable negative caching. Negative caching allows dnsmasq to remember 'no such domain' answers from upstream nameservers and answer identical queries without forwarding them again.
-                        no-negcache
-                        "}
-                                  ${optionalString (cfg.dnsmasq.allServers) "
-                        # Query all configured server for a successful dns resolve
-                        all-servers
-                        "}
+        bind-interfaces
+        listen-address=::1,127.0.0.1
+        ${optionalString (cfg.dnsmasq.validateDnsSec) "
+          dnssec
+          dnssec-check-unsigned
+          conf-file=${pkgs.dnsmasq}/share/dnsmasq/trust-anchors.conf
+          "}
+                    ${optionalString (cfg.dnsmasq.noNegCache) "
+          # Disable negative caching. Negative caching allows dnsmasq to remember 'no such domain' answers from upstream nameservers and answer identical queries without forwarding them again.
+          no-negcache
+          "}
+                    ${optionalString (cfg.dnsmasq.allServers) "
+          # Query all configured server for a successful dns resolve
+          all-servers
+          "}
 
-                                ${optionalString (cfg.dnsmasq.bogusPriv) ''
-                                # Prevent queries for local networks from being sent upstream
-                                bogus-priv
-                              ''}
+          ${optionalString (cfg.dnsmasq.bogusPriv) ''
+          # Prevent queries for local networks from being sent upstream
+          bogus-priv
+        ''}
 
-                                ${concatStringsSep "\n" (map (interface: "interface=${interface}") cfg.dnsmasq.interfaces)}
+          ${concatStringsSep "\n" (map (interface: "interface=${interface}") cfg.dnsmasq.interfaces)}
 
-                                ${optionalString (cfg.dnsmasq.dhcp != [ ]) "
-                        no-dhcp-interface=lo
-                        dhcp-ttl=180
-                        "}
+          ${optionalString (cfg.dnsmasq.dhcp != []) "
+            no-dhcp-interface=lo
+            dhcp-ttl=180
+          "}
 
-                                ${concatStringsSep "\n" (
-        map
-        (
-        dhcp: ''
+          ${concatStringsSep "\n" (
+          map
+          (
+            dhcp: ''
 
-                        domain=${dhcp.domain.name}${optionalString (dhcp.domain.network != "") ",${dhcp.domain.network}${optionalString (dhcp.domain.local) ",local" }"}
+              domain=${dhcp.domain.name}${optionalString (dhcp.domain.network != "") ",${dhcp.domain.network}${optionalString (dhcp.domain.local) ",local"}"}
 
-                        ${concatStringsSep "\n" (
-        map
-        (
-        range: "dhcp-range=set:${range.interface},${range.startAddr},${range.endAddr},${range.leaseTime}
+              ${concatStringsSep "\n" (
+                map
+                (
+                  range: "dhcp-range=set:${range.interface},${range.startAddr},${range.endAddr},${range.leaseTime}
                         "
-        )
-        dhcp.range
+                )
+                dhcp.range
+              )}
+
+              ${concatStringsSep "\n" (
+                map
+                (
+                  host: ''
+                    dhcp-host=${host.hardwareAddress},${host.name},${host.ipAddress},${host.leaseTime},set:${host.name}
+                    ${optionalString (host.staticRecord) "host-record=${host.name},${host.name}.${dhcp.domain.name},${host.ipAddress},120"}
+                  ''
+                )
+                dhcp.host
+              )}
+
+            ''
+          )
+          cfg.dnsmasq.dhcp
         )}
 
-                        ${concatStringsSep "\n" (
-        map
-        (
-        host: ''
-                                        dhcp-host=${host.hardwareAddress},${host.name},${host.ipAddress},${host.leaseTime},set:${host.name}
-                                        ${optionalString (host.staticRecord) "host-record=${host.name},${host.name}.${dhcp.domain.name},${host.ipAddress},120" }
-                                      ''
-        )
-        dhcp.host
-        )}
+        ${optionalString (cfg.dnsmasq.logQueries) "
+           log-queries
+        "}
 
-                        ''
-        )
-        cfg.dnsmasq.dhcp
-        )}
+        cache-size=${toString cfg.dnsmasq.cache-size}
 
-                                ${optionalString (cfg.dnsmasq.logQueries) "
-                        log-queries
-                        "}
-
-                        cache-size=${toString cfg.dnsmasq.cache-size}
-
-                                ${cfg.dnsmasq.extraConfig}
+        ${cfg.dnsmasq.extraConfig}
       '';
     };
   };
