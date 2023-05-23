@@ -298,7 +298,6 @@ in {
 
     services.stubby = {
       enable = true;
-      debugLogging = false;
       settings = stubby_settings;
     };
 
